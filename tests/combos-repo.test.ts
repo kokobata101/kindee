@@ -167,7 +167,8 @@ describe('มื้อประจำในตารางเวลา', () => {
     expect(si[1].qty).toBe(2);
 
     await repo.saveSchedule({ name: combo.name, emoji: combo.emoji, meal: 'breakfast', time: '08:00', days: [0, 1, 2, 3, 4, 5, 6], items: si, enabled: true });
-    const now = new Date('2026-11-10T09:00:00+07:00');
+    // เวลาท้องถิ่นของเครื่อง (ตัวจัดตารางใช้เวลาท้องถิ่น) เพื่อให้เทสต์ผ่านในทุกเขตเวลา
+    const now = new Date(2026, 10, 10, 9, 0, 0);
     expect(await runDueSchedules(now)).toBe(2);
     const day = await repo.getEntries('2026-11-10');
     expect(day.map((e) => e.source)).toEqual(['scheduled', 'scheduled']);
