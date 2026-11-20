@@ -1,0 +1,30 @@
+name: Build iOS (simulator)
+
+# สร้างแอป iOS รุ่นทดสอบสำหรับ iOS Simulator โดยไม่ต้องเซ็นชื่อ (ไม่ต้องมีบัญชี Apple Developer)
+# ติดตั้งบน iPhone จริงต้องเซ็นชื่อด้วย Xcode บน Mac — ดู docs/IOS.md
+on:
+  workflow_dispatch:
+
+jobs:
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:portable
+      - run: npx cap sync ios
+      - name: Build for simulator
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Zip app
+        run: cd build/Build/Products/Debug-iphonesimulator && zip -qr "$GITHUB_WORKSPACE/kindee-ios-simulator.zip" App.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kindee-ios-simulator
+          path: kindee-ios-simulator.zip

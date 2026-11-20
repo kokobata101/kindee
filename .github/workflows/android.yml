@@ -1,0 +1,42 @@
+name: Build Android APK
+
+# กด Actions > "Build Android APK" > Run workflow เพื่อสร้างไฟล์ APK (ดาวน์โหลดได้จากหน้าผลลัพธ์ในหัวข้อ Artifacts)
+# หรือผลัก tag เช่น v0.5.0 เพื่อแนบ APK ไว้ใน Releases อัตโนมัติ
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run build:portable
+      - run: npx cap sync android
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Rename
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk kindee-${{ github.ref_name }}.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kindee-apk
+          path: kindee-*.apk
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: kindee-*.apk
