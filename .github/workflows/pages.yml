@@ -30,7 +30,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # ล็อกอิน/สำรองข้ามเครื่อง (ไม่บังคับ): ตั้งที่ Settings > Secrets and variables > Actions > Variables
+      # ไม่ตั้ง = แอปทำงานแบบไม่มีบัญชีเหมือนเดิม (ค่าเหล่านี้ไม่ใช่ความลับ แต่ต้องจำกัดโดเมนใน Firebase)
       - run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+          VITE_CLOUD_PROVIDERS: ${{ vars.VITE_CLOUD_PROVIDERS }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

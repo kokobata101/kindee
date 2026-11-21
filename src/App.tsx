@@ -19,6 +19,8 @@ import Share, { ReportViewer } from './screens/Share';
 import Settings from './screens/Settings';
 import About from './screens/About';
 import Scan from './screens/Scan';
+import Account from './screens/Account';
+import { CloudProvider } from './sync/context';
 
 import { t } from './i18n';
 function TabLayout() {
@@ -62,6 +64,7 @@ function Gate() {
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/setup" element={<Setup />} />
         <Route path="/report" element={<ReportViewer />} />
+        <Route path="/account" element={<Account />} />
         <Route path="*" element={<Navigate to="/welcome" replace />} />
       </Routes>
     );
@@ -87,6 +90,7 @@ function Gate() {
       <Route path="/report" element={<ReportViewer />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/about" element={<About />} />
+      <Route path="/account" element={<Account />} />
       <Route path="/schedules" element={<Schedules />} />
       <Route path="/schedule/:id" element={<ScheduleEditor />} />
       <Route path="/welcome" element={<Navigate to="/" replace />} />
@@ -99,11 +103,13 @@ function Gate() {
 export default function App() {
   return (
     <AppProvider>
-      <Router>
-        <div className="app">
-          <Gate />
-        </div>
-      </Router>
+      <CloudProvider>
+        <Router>
+          <div className="app">
+            <Gate />
+          </div>
+        </Router>
+      </CloudProvider>
     </AppProvider>
   );
 }

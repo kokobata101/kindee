@@ -145,8 +145,13 @@ async function deriveKey(password: string, salt: Uint8Array, usage: KeyUsage[]):
 }
 
 export async function encodeReport(data: ReportData, password?: string): Promise<string> {
+  return packText(JSON.stringify(data), password);
+}
+
+/** บีบอัด (ถ้าเบราว์เซอร์รองรับ) และเข้ารหัสด้วยรหัสผ่าน (ถ้ามี) → base64url ใช้ร่วมกับการสำรองขึ้นคลาวด์ */
+export async function packText(text: string, password?: string): Promise<string> {
   let flags = 0;
-  let body: Uint8Array = enc.encode(JSON.stringify(data));
+  let body: Uint8Array = enc.encode(text);
   if (hasCompression()) {
     body = await pipe(body, new CompressionStream('deflate-raw'));
     flags |= 2;
@@ -180,6 +185,22 @@ export function isEncrypted(payload: string): boolean {
 }
 
 export async function decodeReport(payload: string, password?: string): Promise<ReportData> {
+  const text = await unpackText(payload, password);
+  let obj: unknown;
+  try {
+    obj = JSON.parse(text);
+  } catch {
+    throw new ShareError(t('ลิงก์รายงานเสียหาย'));
+  }
+  const r = obj as Partial<ReportData> | null;
+  if (!r || r.v !== 1 || !Array.isArray(r.days) || !Array.isArray(r.weights) || !r.goal || typeof r.from !== 'string' || typeof r.to !== 'string') {
+    throw new ShareError(t('รูปแบบรายงานไม่ถูกต้อง'));
+  }
+  return r as ReportData;
+}
+
+/** ย้อนกลับของ packText: ถอดรหัส + คลายการบีบอัด คืนข้อความเดิม */
+export async function unpackText(payload: string, password?: string): Promise<string> {
   const raw = fromBase64Url(payload);
   if (raw.length < 2) throw new ShareError(t('ลิงก์รายงานไม่สมบูรณ์'));
   const flags = raw[0];
@@ -204,17 +225,7 @@ export async function decodeReport(payload: string, password?: string): Promise<
       throw new ShareError(t('ลิงก์รายงานเสียหาย'));
     }
   }
-  let obj: unknown;
-  try {
-    obj = JSON.parse(dec.decode(body));
-  } catch {
-    throw new ShareError(t('ลิงก์รายงานเสียหาย'));
-  }
-  const r = obj as Partial<ReportData> | null;
-  if (!r || r.v !== 1 || !Array.isArray(r.days) || !Array.isArray(r.weights) || !r.goal || typeof r.from !== 'string' || typeof r.to !== 'string') {
-    throw new ShareError(t('รูปแบบรายงานไม่ถูกต้อง'));
-  }
-  return r as ReportData;
+  return dec.decode(body);
 }
 
 /** ลิงก์เต็มสำหรับเปิดรายงาน (ใช้ HashRouter จึงต่อท้ายด้วย #/report) */

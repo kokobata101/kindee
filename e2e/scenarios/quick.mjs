@@ -29,7 +29,7 @@ export default async function ({ page, shot, BASE }) {
   await page.getByRole('textbox', { name: 'คาร์บ' }).fill('50');
   await page.getByRole('textbox', { name: 'ไขมัน' }).fill('10');
   await page.getByRole('button', { name: /คำนวณแคลอรี่จากสารอาหาร = 370/ }).waitFor(); // 4×20 + 4×50 + 9×10
-  await page.getByRole('button', { name: 'มื้อเย็น' }).click();
+  await page.getByRole('button', { name: 'มื้อเย็น', exact: false }).filter({ hasText: '🌙' }).click();
   await shot('61-quick-filled');
   await page.getByRole('button', { name: 'เพิ่มลงมื้อเย็น' }).click();
 

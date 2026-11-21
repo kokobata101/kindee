@@ -5,6 +5,7 @@ import { Button } from '../ui/kit';
 import { importBackup, BackupError } from '../db/backup';
 import { useApp } from '../app/context';
 import { APP_NAME, APP_NAME_EN, APP_VERSION } from '../app/meta';
+import { useCloud } from '../sync/context';
 
 import { t } from '../i18n';
 import { LanguageSwitch } from '../ui/LanguageSwitch';
@@ -13,6 +14,7 @@ export default function Welcome() {
   const { toast } = useApp();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const cloud = useCloud();
 
   async function restore(file: File) {
     setBusy(true);
@@ -70,6 +72,9 @@ export default function Welcome() {
       <div className="col gap12">
         <Button onClick={() => nav('/setup')}>{t('เริ่มต้นใช้งาน')}</Button>
         <Button variant="outline" disabled={busy} onClick={() => fileRef.current?.click()}>{t('กู้คืนจากไฟล์สำรอง')}</Button>
+        {cloud.supported && (
+          <Button variant="outline" onClick={() => nav('/account')}>{t('เข้าสู่ระบบเพื่อดึงข้อมูลจากคลาวด์')}</Button>
+        )}
         <input
           ref={fileRef}
           type="file"
