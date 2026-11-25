@@ -1,5 +1,6 @@
 // หลังบ้านจริงด้วย Firebase: Authentication (Google / Facebook / Apple / LINE) + Firestore (เก็บสแนปช็อตสำรอง)
 // โหลดแบบ dynamic import เท่านั้น เมื่อเจ้าของเว็บตั้งค่า VITE_FIREBASE_* ไว้ (ดู docs/CLOUD.md)
+import { Capacitor } from '@capacitor/core';
 import { getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase/app';
 import {
   FacebookAuthProvider,
@@ -9,10 +10,13 @@ import {
   getAuth,
   getRedirectResult,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   reauthenticateWithPopup,
+  signInWithCredential,
   signInWithPopup,
   signInWithRedirect,
   type Auth,
+  type AuthCredential,
   type AuthProvider,
   type User,
 } from 'firebase/auth';
@@ -133,6 +137,53 @@ class FirestoreStore implements RemoteStore {
   }
 }
 
+
+const isNative = () => {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * แอปมือถือ (iOS/Android): หน้าต่างป๊อปอัป/เปลี่ยนหน้าของเว็บใช้ใน WebView ไม่ได้ จึงล็อกอินที่ฝั่งเนทีฟด้วยปลั๊กอิน
+ * @capacitor-firebase/authentication (skipNativeAuth: true) แล้วเอา token ที่ได้มาเข้าสู่ Firebase JS SDK ตัวเดียวกับที่ใช้ซิงก์
+ * ยังไม่เคยทดสอบบนอุปกรณ์จริง (ดู docs/CLOUD.md หัวข้อแอปมือถือ)
+ */
+async function nativeCredential(p: ProviderId): Promise<AuthCredential> {
+  const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
+  switch (p) {
+    case 'google': {
+      const r = await FirebaseAuthentication.signInWithGoogle({ skipNativeAuth: true });
+      if (!r.credential?.idToken) throw Object.assign(new Error('no id token'), { code: 'auth/invalid-credential' });
+      return GoogleAuthProvider.credential(r.credential.idToken, r.credential.accessToken);
+    }
+    case 'facebook': {
+      const r = await FirebaseAuthentication.signInWithFacebook({ skipNativeAuth: true });
+      if (!r.credential?.accessToken) throw Object.assign(new Error('no access token'), { code: 'auth/invalid-credential' });
+      return FacebookAuthProvider.credential(r.credential.accessToken);
+    }
+    case 'apple': {
+      const r = await FirebaseAuthentication.signInWithApple({ skipNativeAuth: true });
+      if (!r.credential?.idToken) throw Object.assign(new Error('no id token'), { code: 'auth/invalid-credential' });
+      return new OAuthProvider('apple.com').credential({ idToken: r.credential.idToken, rawNonce: r.credential.nonce });
+    }
+    case 'line': {
+      const r = await FirebaseAuthentication.signInWithOpenIdConnect({ providerId: 'oidc.line', skipNativeAuth: true });
+      if (!r.credential?.idToken && !r.credential?.accessToken) throw Object.assign(new Error('no token'), { code: 'auth/invalid-credential' });
+      return new OAuthProvider('oidc.line').credential({ idToken: r.credential.idToken, accessToken: r.credential.accessToken });
+    }
+  }
+}
+
+/** ข้อผิดพลาดจากปลั๊กอินเนทีฟ (ผู้ใช้กดยกเลิก ฯลฯ) → รหัสเดียวกับของ Firebase JS */
+function nativeError(e: unknown): unknown {
+  const msg = String((e as { message?: string; code?: string } | null)?.message ?? '') + String((e as { code?: string } | null)?.code ?? '');
+  if (/cancel|dismiss|1001|12501|popup-closed/i.test(msg)) return { code: 'auth/user-cancelled' };
+  return e;
+}
+
 function toUser(u: User): CloudUser {
   const info = u.providerData[0];
   return {
@@ -156,6 +207,14 @@ export function createFirebaseBackend(config: FirebaseOptions, providers: Provid
       return onAuthStateChanged(auth, (u) => cb(u ? toUser(u) : null));
     },
     async signIn(p) {
+      if (isNative()) {
+        try {
+          await signInWithCredential(auth, await nativeCredential(p));
+        } catch (e) {
+          throw mapAuthError(nativeError(e));
+        }
+        return;
+      }
       const provider = makeProvider(p);
       try {
         await signInWithPopup(auth, provider);
@@ -178,6 +237,14 @@ export function createFirebaseBackend(config: FirebaseOptions, providers: Provid
     },
     async signOut() {
       await auth.signOut();
+      if (isNative()) {
+        try {
+          const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
+          await FirebaseAuthentication.signOut();
+        } catch {
+          /* ไม่มีเซสชันเนทีฟให้ออกก็ไม่เป็นไร */
+        }
+      }
     },
     async deleteAccount() {
       const user = auth.currentUser;
@@ -191,10 +258,11 @@ export function createFirebaseBackend(config: FirebaseOptions, providers: Provid
         const pid = PROVIDER_IDS[user.providerData[0]?.providerId ?? ''];
         if (!pid) throw mapAuthError(e);
         try {
-          await reauthenticateWithPopup(user, makeProvider(pid));
+          if (isNative()) await reauthenticateWithCredential(user, await nativeCredential(pid));
+          else await reauthenticateWithPopup(user, makeProvider(pid));
           await deleteUser(user);
         } catch (e2) {
-          throw mapAuthError(e2);
+          throw mapAuthError(nativeError(e2));
         }
       }
     },

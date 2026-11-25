@@ -11,12 +11,13 @@ export function configuredProviders(): ProviderId[] {
 
 /**
  * ระบบล็อกอิน/ซิงก์ใช้ได้เมื่อ: ตั้งค่า Firebase ไว้ตอน build (หรือเป็นรุ่นทดสอบ cloudmock)
- * และรันบนเว็บ http(s) — แอปมือถือ (Capacitor) และไฟล์ file:// ยังไม่รองรับ เพราะหน้าต่างล็อกอินของผู้ให้บริการใช้ไม่ได้ใน WebView
+ * และรันบนเว็บ http(s) หรือแอปมือถือ (Capacitor ใช้ล็อกอินเนทีฟ) — ไฟล์ file:// ไม่รองรับ
  */
 export function cloudSupported(): boolean {
   if (!import.meta.env.VITE_CLOUD_MOCK && !import.meta.env.VITE_FIREBASE_API_KEY) return false;
   try {
-    if (Capacitor.isNativePlatform()) return false;
+    // แอปมือถือ: ล็อกอินผ่านปลั๊กอินเนทีฟ (ไม่ต้องใช้ http(s))
+    if (Capacitor.isNativePlatform()) return !import.meta.env.VITE_CLOUD_MOCK;
   } catch {
     /* ไม่มี Capacitor = เว็บ */
   }

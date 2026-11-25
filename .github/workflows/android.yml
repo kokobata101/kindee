@@ -24,7 +24,14 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm ci
+      # ล็อกอินเนทีฟ (ไม่บังคับ): ตั้ง Repository variables ตาม docs/CLOUD.md ไม่ตั้ง = แอปไม่มีปุ่มล็อกอิน
       - run: npm run build:portable
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+          VITE_CLOUD_PROVIDERS: ${{ vars.VITE_CLOUD_PROVIDERS }}
       - run: npx cap sync android
       - name: Build debug APK
         working-directory: android

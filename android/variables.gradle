@@ -13,4 +13,9 @@ ext {
     androidxJunitVersion = '1.3.0'
     androidxEspressoCoreVersion = '3.7.0'
     cordovaAndroidVersion = '14.0.1'
+    // ล็อกอินเนทีฟของระบบสำรองข้อมูล (@capacitor-firebase/authentication) ดู docs/CLOUD.md
+    rgcfaIncludeGoogle = true
+    rgcfaIncludeFacebook = true
+    androidxCredentialsVersion = '1.3.0'
+    androidxCredentialsPlayServicesAuthVersion = '1.3.0'
 }

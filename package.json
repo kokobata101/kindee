@@ -23,6 +23,7 @@
     "build:cloudmock": "tsc --noEmit && vite build --mode cloudmock --outDir dist-cloudmock"
   },
   "dependencies": {
+    "@capacitor-firebase/authentication": "^8.6.0",
     "@capacitor/core": "^8.6.2",
     "@capacitor/filesystem": "^8.1.5",
     "@capacitor/ios": "^8.6.2",
@@ -31,7 +32,7 @@
     "@zxing/library": "^0.21.3",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",
-    "firebase": "^13.4.0",
+    "firebase": "^12.19.0",
     "lucide-react": "^1.61.0",
     "qrcode": "^1.5.4",
     "react": "^19.3.1",

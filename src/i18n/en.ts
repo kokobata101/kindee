@@ -802,7 +802,7 @@ export const en: Record<string, string> = {
   "บัญชีและซิงก์": "Account & sync",
   "สถานะระบบบัญชี": "Account system status",
   "ยังไม่เปิดใช้ล็อกอินในเวอร์ชันนี้": "Sign-in is not enabled in this version",
-  "แอปมือถือและไฟล์ที่เปิดจากเครื่องยังไม่รองรับการล็อกอิน ใช้ผ่านเว็บเวอร์ชันออนไลน์ได้ ส่วนข้อมูลของคุณยังเก็บในเครื่องและสำรองเป็นไฟล์ได้ตามปกติ": "The mobile app and files opened from your device do not support sign-in yet. Use the online web version instead. Your data stays on your device and can still be backed up as a file as usual.",
+  "ไฟล์ที่เปิดจากเครื่อง (file://) ยังไม่รองรับการล็อกอิน ใช้ผ่านเว็บเวอร์ชันออนไลน์หรือแอปมือถือได้ ส่วนข้อมูลของคุณยังเก็บในเครื่องและสำรองเป็นไฟล์ได้ตามปกติ": "Files opened from your device (file://) do not support sign-in. Use the online web version or the mobile app instead. Your data stays on your device and can still be backed up as a file as usual.",
   "เว็บนี้ยังไม่ได้ตั้งค่าบริการล็อกอิน แอปยังใช้งานได้ครบทุกอย่างโดยไม่ต้องมีบัญชี ถ้าคุณเป็นเจ้าของเว็บ ดูวิธีเปิดใช้ได้ใน docs/CLOUD.md": "This site has not set up a sign-in service. The app still works fully without an account. If you are the site owner, see docs/CLOUD.md for how to enable it.",
   "ล็อกอินเพื่อสำรองและใช้ข้ามเครื่อง": "Sign in to back up and use across devices",
   "ไม่บังคับ — ไม่ล็อกอินก็ใช้แอปได้ครบทุกอย่าง ล็อกอินแล้วข้อมูลของคุณจะมีสำเนาสำรอง และเปิดบนมือถือเครื่องอื่นหรือคอมพิวเตอร์ได้ข้อมูลชุดเดียวกัน": "Optional — the app works fully without signing in. Once signed in, your data gets a backup copy and you see the same data on another phone or computer.",

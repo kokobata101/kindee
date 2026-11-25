@@ -4,4 +4,8 @@
     <string name="title_activity_main">กินดี</string>
     <string name="package_name">org.kindee.app</string>
     <string name="custom_url_scheme">org.kindee.app</string>
+    <!-- Facebook Login: แทนค่าด้านล่างด้วยของจริงจาก developers.facebook.com (ดู docs/CLOUD.md) ถ้าไม่ใช้ Facebook ปล่อยไว้ได้ -->
+    <string name="facebook_app_id">0000000000</string>
+    <string name="fb_login_protocol_scheme">fb0000000000</string>
+    <string name="facebook_client_token">replace-with-client-token</string>
 </resources>

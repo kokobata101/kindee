@@ -40,7 +40,7 @@ export default function Account() {
   if (!supported) {
     const nativeOrFile = (() => {
       try {
-        return Capacitor.isNativePlatform() || location.protocol === 'file:';
+        return !Capacitor.isNativePlatform() && location.protocol === 'file:';
       } catch {
         return false;
       }
@@ -56,7 +56,7 @@ export default function Account() {
             </span>
             <p className="body-m t2">
               {nativeOrFile
-                ? t('แอปมือถือและไฟล์ที่เปิดจากเครื่องยังไม่รองรับการล็อกอิน ใช้ผ่านเว็บเวอร์ชันออนไลน์ได้ ส่วนข้อมูลของคุณยังเก็บในเครื่องและสำรองเป็นไฟล์ได้ตามปกติ')
+                ? t('ไฟล์ที่เปิดจากเครื่อง (file://) ยังไม่รองรับการล็อกอิน ใช้ผ่านเว็บเวอร์ชันออนไลน์หรือแอปมือถือได้ ส่วนข้อมูลของคุณยังเก็บในเครื่องและสำรองเป็นไฟล์ได้ตามปกติ')
                 : t('เว็บนี้ยังไม่ได้ตั้งค่าบริการล็อกอิน แอปยังใช้งานได้ครบทุกอย่างโดยไม่ต้องมีบัญชี ถ้าคุณเป็นเจ้าของเว็บ ดูวิธีเปิดใช้ได้ใน docs/CLOUD.md')}
             </p>
           </section>

@@ -1,5 +1,8 @@
 import UIKit
 import Capacitor
+#if canImport(FBSDKCoreKit)
+import FBSDKCoreKit
+#endif
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,7 +10,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Facebook Login (ล็อกอินเนทีฟ): เริ่มทำงานเมื่อใส่ FacebookAppID ใน Info.plist แล้วเท่านั้น (ดู docs/CLOUD.md)
+        #if canImport(FBSDKCoreKit)
+        if let id = Bundle.main.object(forInfoDictionaryKey: "FacebookAppID") as? String, !id.isEmpty {
+            ApplicationDelegate.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
+        }
+        #endif
         return true
     }
 
